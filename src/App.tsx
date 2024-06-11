@@ -11,12 +11,12 @@ function App() {
 	const handleSearch = async () => {
 		try {
 			// dev
-			const response = await axios.get(
-				`http://localhost:3000/api/track-by-cpf/${cpf}`,
-			);
+			// const response = await axios.get(
+			// 	`http://localhost:3000/api/track-by-cpf/${cpf}`,
+			// );
 
 			//prod
-			// const response = await axios.get(`/api/track-by-cpf/${cpf}`);
+			const response = await axios.get(`/api/track-by-cpf/${cpf}`);
 
 			setTrack(response.data);
 		} catch (error) {
