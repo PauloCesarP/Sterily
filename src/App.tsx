@@ -7,9 +7,12 @@ import "./index.css";
 function App() {
 	const [cpf, setCpf] = useState("");
 	const [track, setTrack] = useState([]);
+	const [isLoading, setIsLoading] = useState(false);
 
 	const handleSearch = async () => {
 		try {
+			setIsLoading(true);
+
 			// dev
 			// const response = await axios.get(
 			// 	`http://localhost:3000/api/track-by-cpf/${cpf}`,
@@ -19,11 +22,13 @@ function App() {
 			const response = await axios.get(`/api/track-by-cpf/${cpf}`);
 
 			setTrack(response.data);
+			setIsLoading(false);
 		} catch (error) {
 			setTrack([]);
 
 			toast.error("CPF não encontrado");
 			console.error(error);
+			setIsLoading(false);
 		}
 	};
 
@@ -64,8 +69,11 @@ function App() {
 				<h1 className="font-bold text-center font-['Montserrat'] text-lg">
 					Rastreamento
 				</h1>
+				<p className="text-center font-bold mb-10">
+					Preencher com o seu CPF no campo abaixo
+				</p>
 
-				<div className="flex gap-6 items-center">
+				<div className="flex gap-6 items-center p-4">
 					<div className="flex-1">
 						{/* <label
 							htmlFor="first_name"
@@ -81,13 +89,41 @@ function App() {
 							className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
 							placeholder="CPF"
 							required
+							onKeyDown={(e) => {
+								if (e.key === "Enter") {
+									handleSearch();
+								}
+							}}
 						/>
 					</div>
 					<button
 						type="button"
 						onClick={handleSearch}
-						className="py-2.5 px-5 me-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100"
+						className="flex py-2.5 px-5 me-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100"
 					>
+						{isLoading && (
+							<svg
+								className="animate-spin -ml-1 mr-3 h-5 w-5 text-gray-900"
+								xmlns="http://www.w3.org/2000/svg"
+								fill="none"
+								viewBox="0 0 24 24"
+							>
+								<circle
+									className="opacity-25"
+									cx="12"
+									cy="12"
+									r="10"
+									stroke="currentColor"
+									stroke-width="4"
+								/>
+								<path
+									className="opacity-75"
+									fill="currentColor"
+									d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+								/>
+								<title>Buscar</title>
+							</svg>
+						)}
 						Buscar
 					</button>
 				</div>
@@ -104,6 +140,65 @@ function App() {
 
 				{/* <div>
 					<pre>{JSON.stringify(track, null, 2)}</pre>
+				</div> */}
+
+				{/* <div
+					className="flex items-center justify-center"
+					style={{ display: isLoading ? "flex" : "none" }}
+				>
+					<div className="w-10">
+						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+							<radialGradient
+								id="a11"
+								cx=".66"
+								fx=".66"
+								cy=".3125"
+								fy=".3125"
+								gradientTransform="scale(1.5)"
+							>
+								<stop offset="0" stop-color="#2E41FF" />
+								<stop offset=".3" stop-color="#2E41FF" stop-opacity=".9" />
+								<stop offset=".6" stop-color="#2E41FF" stop-opacity=".6" />
+								<stop offset=".8" stop-color="#2E41FF" stop-opacity=".3" />
+								<stop offset="1" stop-color="#2E41FF" stop-opacity="0" />
+							</radialGradient>
+							<circle
+								transform-origin="center"
+								fill="none"
+								stroke="url(#a11)"
+								stroke-width="15"
+								stroke-linecap="round"
+								stroke-dasharray="200 1000"
+								stroke-dashoffset="0"
+								cx="100"
+								cy="100"
+								r="70"
+							>
+								<animateTransform
+									type="rotate"
+									attributeName="transform"
+									calcMode="spline"
+									dur="2"
+									values="360;0"
+									keyTimes="0;1"
+									keySplines="0 0 1 1"
+									repeatCount="indefinite"
+								/>
+							</circle>
+							<circle
+								transform-origin="center"
+								fill="none"
+								opacity=".2"
+								stroke="#2E41FF"
+								stroke-width="15"
+								stroke-linecap="round"
+								cx="100"
+								cy="100"
+								r="70"
+							/>
+							<title>Loading</title>
+						</svg>
+					</div>
 				</div> */}
 
 				<section className="relative flex flex-col justify-center overflow-hidden mt-20 mb-20">
@@ -143,7 +238,29 @@ function App() {
 																{item.scanTime}
 															</time>
 														</div>
-														<div className="text-slate-500">{item.desc}</div>
+														<div className="text-slate-500">
+															{item.desc
+																.replace("Departed", "Partiu")
+																.replace("Shipped for", "Enviado para")
+																.replace("Arrival", "Chegada")
+																.replace("Your", "Seu")
+																.replace("J&T Courier", "J&T Courier ")
+																.replace("J&T courier", "J&T Courier ")
+																.replace("Delivering", " Entregando")
+																.replace(
+																	"Recceived！Recceived by",
+																	"Recebido！Recebido por",
+																)
+																.replace(
+																	"，In case of doubt, please contact：08000550050，If there is any excption or complaint, please contact the network：08000550050",
+																	"，Em caso de dúvida, entre em contato：08000550050，Se houver alguma exceção ou reclamação, entre em contato com a rede：08000550050",
+																)
+																.replace("up。", "Enviou。")
+																.replace(
+																	"If there is any excption or complaint, please contact the network: 08000550050",
+																	"Caso haja alguma exceção ou reclamação, entre em contato com a rede: 08000550050",
+																)}
+														</div>
 													</div>
 												</div>
 											);

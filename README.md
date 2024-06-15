@@ -9,4 +9,4 @@
 ```yarn build ou npm run build```
 
 - Rodar a aplicação
-```yarn start ou npm star```
+```yarn start ou npm start```
